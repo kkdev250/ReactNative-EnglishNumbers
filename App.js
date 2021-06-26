@@ -1,111 +1,75 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+import React, { useState } from 'react';
+import {View, Text, Button, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import NativeSpeech from './components/NativeSpeech';
 
-import React from 'react';
-import type {Node} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const App = () => {
+  const drawANumber = () => Math.floor(Math.random() * 10000);
+  const [drawnNumber, setDrawnNumber] = useState(drawANumber());
+  const [enteredNumber, setEnteredNumber] = useState('');
+  const [usersGuess, setUsersGuess] = useState(null);
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  const numberInputHandler = (inputText) => {
+    setEnteredNumber(inputText.replace(/[^0-9]/g, ''));
+  };
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+  const isNewGuess = usersGuess === null;
+  const isCorrect = +usersGuess === drawnNumber;
+  const isWrong = usersGuess && +usersGuess !== drawnNumber;
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const guessHandler = () => {
+    setUsersGuess(enteredNumber);
+  };
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const correctHandler = () => {
+    setUsersGuess(null);
+    setEnteredNumber('');
+    setDrawnNumber(drawANumber());
+  };
+
+  const wrongHandler = () => {
+    setUsersGuess(null);
+    setEnteredNumber('');
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss()}}>
+      <View style={styles.screen}>
+        {/* <Text>{drawnNumber.toString()}</Text> */}
+        <NativeSpeech title="Listen to a number" text={`${drawnNumber}`} disabled={!isNewGuess} />
+        <TextInput
+          style={styles.input}
+          blurOnSubmit={false}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="number-pad"
+          maxLength={4}
+          placeholder="enter the number you heard"
+          onChangeText={numberInputHandler}
+          value={enteredNumber}
+          editable={isNewGuess}
+        />
+        <View>
+          {isNewGuess && <Button title="Check" onPress={guessHandler} />}
+          {isCorrect && <Button color='green' title="OK! :-)" onPress={correctHandler} />}
+          {isWrong && <Button color='red' title=":-( Try again..." onPress={wrongHandler} />}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  screen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  input: {
+    width: '60%',
+    borderColor: 'black',
+    borderWidth: 1,
+    padding: 10,
+    marginTop: 20,
   },
 });
 
