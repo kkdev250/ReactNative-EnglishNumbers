@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import {View, Text, Button, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import CustomButton from './components/CustomButton';
 import NativeSpeech from './components/NativeSpeech';
 
 const App = () => {
@@ -12,11 +22,11 @@ const App = () => {
     setEnteredNumber(inputText.replace(/[^0-9]/g, ''));
   };
 
-  const isNewGuess = usersGuess === null;
+  const isNewGuess = !usersGuess;
   const isCorrect = +usersGuess === drawnNumber;
   const isWrong = usersGuess && +usersGuess !== drawnNumber;
 
-  const guessHandler = () => {
+  const checkHandler = () => {
     setUsersGuess(enteredNumber);
   };
 
@@ -32,10 +42,18 @@ const App = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss()}}>
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+    >
       <View style={styles.screen}>
         {/* <Text>{drawnNumber.toString()}</Text> */}
-        <NativeSpeech title="Listen to a number" text={`${drawnNumber}`} disabled={!isNewGuess} />
+        <NativeSpeech
+          title="Listen to a number"
+          text={`${drawnNumber}`}
+          disabled={!isNewGuess}
+        />
         <TextInput
           style={styles.input}
           blurOnSubmit={false}
@@ -43,15 +61,38 @@ const App = () => {
           autoCorrect={false}
           keyboardType="number-pad"
           maxLength={4}
-          placeholder="enter the number you heard"
+          placeholder="Enter the number you heard"
           onChangeText={numberInputHandler}
+          onSubmitEditing={checkHandler}
           value={enteredNumber}
           editable={isNewGuess}
         />
         <View>
-          {isNewGuess && <Button title="Check" onPress={guessHandler} />}
-          {isCorrect && <Button color='green' title="OK! :-)" onPress={correctHandler} />}
-          {isWrong && <Button color='red' title=":-( Try again..." onPress={wrongHandler} />}
+          {isNewGuess && (
+            <CustomButton
+              onPress={checkHandler}
+              bgColor="blue"
+              disabled={!enteredNumber}
+            >
+              <Text style={styles.buttonText}>Check</Text>
+            </CustomButton>
+          )}
+          {isCorrect && (
+            <CustomButton onPress={correctHandler} bgColor="green">
+              <View style={styles.button}>
+                <Icon name="emoticon-happy-outline" size={35} color="white" />
+                <Text style={styles.buttonText}>Correct!</Text>
+              </View>
+            </CustomButton>
+          )}
+          {isWrong && (
+            <CustomButton onPress={wrongHandler} bgColor="red">
+              <View style={styles.button}>
+                <Icon name="emoticon-sad-outline" size={35} color="white" />
+                <Text style={styles.buttonText}>Try again...</Text>
+              </View>
+            </CustomButton>
+          )}
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -69,7 +110,15 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderWidth: 1,
     padding: 10,
-    marginTop: 20,
+    marginVertical: 20,
+  },
+  button: {
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: 'white',
+    fontFamily: 'open-sans',
+    fontSize: 18,
   },
 });
 
